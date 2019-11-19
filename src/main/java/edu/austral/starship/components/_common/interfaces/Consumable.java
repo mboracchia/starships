@@ -1,4 +1,4 @@
-package edu.austral.starship.base.interfaces;
+package edu.austral.starship.components._common.interfaces;
 
 import edu.austral.starship.components.starship.Starship;
 import edu.austral.starship.components.starship.StarshipWeapon;
