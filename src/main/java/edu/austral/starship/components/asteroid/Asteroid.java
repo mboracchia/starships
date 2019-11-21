@@ -9,7 +9,8 @@ import java.awt.*;
 public class Asteroid extends GameObject {
     private static final int ASTEROID_HEIGHT = 40;
     private static final int ASTEROID_WIDTH = 40;
-    private static final float ASTEROID_SPEED = 6f;
+    private static final int ASTEROID_SCORE = 300;
+    private static final float ASTEROID_SPEED = 3f;
     private static final CollisionsVisitor COLLISIONS_VISITOR = new AsteroidCollisionsVisitor();
 
     private int size;
@@ -39,5 +40,13 @@ public class Asteroid extends GameObject {
     @Override
     public void move() {
         setPosition(getPosition().add(getDirection().unitary().multiply(speed)));
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public static int getAsteroidScore() {
+        return ASTEROID_SCORE;
     }
 }

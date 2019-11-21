@@ -14,6 +14,11 @@ import edu.austral.starship.components.item.Item;
 import edu.austral.starship.components.item.ItemController;
 import edu.austral.starship.components.item.ItemFactory;
 import edu.austral.starship.components.item.ItemView;
+import edu.austral.starship.components.item.shootingSpeed.ShootingSpeedItemFactory;
+import edu.austral.starship.components.item.shootingSpeed.ShootingSpeedItemView;
+import edu.austral.starship.components.item.starshipLife.StarshipLifeItem;
+import edu.austral.starship.components.item.starshipLife.StarshipLifeItemFactory;
+import edu.austral.starship.components.item.starshipLife.StarshipLifeItemView;
 import edu.austral.starship.components.projectile.Projectile;
 import edu.austral.starship.components.projectile.ProjectileController;
 import edu.austral.starship.components.projectile.ProjectileView;
@@ -47,6 +52,8 @@ public class CustomGameFramework implements GameFramework {
     private final int D = 68;
     private final int Q = 81;
 
+    private final int R = 82;
+
     private final int ASTEROID_DELAY = 10;
     private final int ITEM_DELAY = 50;
     private final int RESPAWN_DELAY = 20;
@@ -59,6 +66,7 @@ public class CustomGameFramework implements GameFramework {
 
     private boolean multiplayer;
     private boolean started;
+    private boolean restarted;
 
     private PImage background;
     private PImage starship1;
@@ -66,13 +74,15 @@ public class CustomGameFramework implements GameFramework {
     private PImage projectile1;
     private PImage projectile2;
     private PImage asteroid;
-    private PImage item;
+    private PImage itemShootingSpeed;
+    private PImage itemLife;
 
     private CollisionEngine collisionEngine;
 
     private AsteroidFactory asteroidFactory;
     private StarshipFactory starshipFactory;
-    private ItemFactory itemFactory;
+    private ItemFactory itemShootingSpeedFactory;
+    private ItemFactory itemLifeFactory;
 
     private StarshipController player1;
     private StarshipController player2;
@@ -93,6 +103,7 @@ public class CustomGameFramework implements GameFramework {
 
         multiplayer = false;
         started = false;
+        restarted = false;
 
         background = imageLoader.load(BACKGROUND_PATH);
         starship1 = imageLoader.load(StarshipView.getSpritePath() + "1.png");
@@ -100,13 +111,15 @@ public class CustomGameFramework implements GameFramework {
         projectile1 = imageLoader.load(ProjectileView.getSpritePath() + "1.png");
         projectile2 = imageLoader.load(ProjectileView.getSpritePath() + "2.png");
         asteroid = imageLoader.load(AsteroidView.getSpritePath());
-        item = imageLoader.load(ItemView.getSpritePath());
+        itemShootingSpeed = imageLoader.load(ShootingSpeedItemView.getSpritePath());
+        itemLife = imageLoader.load(StarshipLifeItemView.getSpritePath());
 
         collisionEngine = new CollisionEngine();
 
         starshipFactory = new StarshipFactory();
         asteroidFactory = new AsteroidFactory();
-        itemFactory = new ItemFactory();
+        itemShootingSpeedFactory = new ShootingSpeedItemFactory();
+        itemLifeFactory = new StarshipLifeItemFactory();
 
         player1 = starshipFactory.make(0, 0);
         player1.setImage(starship1);
@@ -122,9 +135,28 @@ public class CustomGameFramework implements GameFramework {
         graphics.background(background);
         graphics.translate(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 
+        if(restarted) {
+            asteroidTime = 0;
+            itemTime = 0;
+            respawnTime = 0;
+            shootingTime1 = 0;
+            shootingTime2 = 0;
+
+            multiplayer = false;
+            restarted = false;
+
+            player1 = starshipFactory.make(0, 0);
+            player1.setImage(starship1);
+
+            gameControllers = new ArrayList<>();
+            gameControllersToDelete = new ArrayList<>();
+
+            gameControllers.add(player1);
+        }
+
         if (started) {
             if (multiplayer) {
-                if (player1.isAlive()) {
+                if (player1.isAlive() && gameControllers.contains(player1)) {
                     if (keySet.contains(UP_ARROW)) {
                         player1.moveForward();
                     }
@@ -157,7 +189,7 @@ public class CustomGameFramework implements GameFramework {
                     }
                 }
 
-                if (player2.isAlive()) {
+                if (player2.isAlive() && gameControllers.contains(player2)) {
                     if (keySet.contains(W)) {
                         player2.moveForward();
                     }
@@ -190,8 +222,15 @@ public class CustomGameFramework implements GameFramework {
                     }
                 }
 
+                graphics.textAlign(3);
+                graphics.textSize(24.0f);
+                graphics.text("PLAYER 1 SCORE: " + player1.getScore(), 0, - (WINDOW_HEIGHT / 2) + 45);
+                graphics.textAlign(3);
+                graphics.textSize(24.0f);
+                graphics.text("PLAYER 2 SCORE: " + player2.getScore(), 0, - (WINDOW_HEIGHT / 2) + 90);
+
             } else {
-                if (player1.isAlive()) {
+                if (player1.isAlive() && gameControllers.contains(player1)) {
                     if (keySet.contains(UP_ARROW)) {
                         player1.moveForward();
                     }
@@ -222,14 +261,17 @@ public class CustomGameFramework implements GameFramework {
                     for (int i = 0; i < player1.getLives(); i++) {
                         graphics.image(starship1, -(WINDOW_WIDTH / 2) + 30 + 30 * i, -(WINDOW_HEIGHT / 2) + 30, 20, 20);
                     }
-                }
 
-                if (keySet.contains(W) || keySet.contains(A) || keySet.contains(S) || keySet.contains(D) || keySet.contains(Q)) {
-                    player2 = starshipFactory.make(0, 0);
-                    player2.setImage(starship2);
-                    gameControllers.add(player2);
-                    multiplayer = true;
+                    if (keySet.contains(W) || keySet.contains(A) || keySet.contains(S) || keySet.contains(D) || keySet.contains(Q)) {
+                        player2 = starshipFactory.make(0, 0);
+                        player2.setImage(starship2);
+                        gameControllers.add(player2);
+                        multiplayer = true;
+                    }
                 }
+                graphics.textAlign(3);
+                graphics.textSize(24.0f);
+                graphics.text("SCORE: " + player1.getScore(), 0, - (WINDOW_HEIGHT / 2) + 45);
             }
 
             if (asteroidTime % ASTEROID_DELAY == 0) {
@@ -241,13 +283,22 @@ public class CustomGameFramework implements GameFramework {
                 asteroidTime++;
             }
 
-            if (itemTime % ITEM_DELAY == 0 && Math.random() < Item.getDropProbability()) {
-                ItemController newItem = itemFactory.make();
-                newItem.setImage(item);
-                gameControllers.add(newItem);
-                itemTime++;
-            } else {
-                itemTime++;
+            if (player1.isAlive() && gameControllers.contains(player1)) {
+                if (itemTime % ITEM_DELAY == 0 && Math.random() < Item.getDropProbability()) {
+                    if(Math.random() < .5) {
+                        ItemController newItem = itemShootingSpeedFactory.make();
+                        newItem.setImage(itemShootingSpeed);
+                        gameControllers.add(newItem);
+                        itemTime++;
+                    } else {
+                        ItemController newItem = itemLifeFactory.make();
+                        newItem.setImage(itemLife);
+                        gameControllers.add(newItem);
+                        itemTime++;
+                    }
+                } else {
+                    itemTime++;
+                }
             }
 
             List<GameObject> gameObjects = new ArrayList<>();
@@ -266,27 +317,45 @@ public class CustomGameFramework implements GameFramework {
 
             gameControllers.removeAll(gameControllersToDelete);
 
-            if (!multiplayer) {
+            if (!multiplayer && !restarted) {
                 if (!player1.isAlive()) {
-                    graphics.text("GAME OVER", 0, 0);
+                    graphics.text("GAME OVER", 0, (WINDOW_HEIGHT / 2) - 90);
+                    graphics.textAlign(3);
+                    graphics.textSize(24.0f);
+                    graphics.text("PRESS R TO START A NEW GAME", 0, (WINDOW_HEIGHT / 2) - 45);
+                    if (keySet.contains(R)) {
+                        restarted = true;
+                    }
                 }
             } else {
                 if (player1.isAlive() && !player2.isAlive()) {
-                    graphics.text("PLAYER 1 WINS", 0, 0);
+                    graphics.text("PLAYER 1 WINS", 0, (WINDOW_HEIGHT / 2) - 90);
+                    graphics.textAlign(3);
+                    graphics.textSize(24.0f);
+                    graphics.text("PRESS R TO START A NEW GAME", 0, (WINDOW_HEIGHT / 2) - 45);
                     if (gameControllers.contains(player1)) {
                         gameControllers.remove(player1);
                     }
+                    if (keySet.contains(R)) {
+                        restarted = true;
+                    }
                 } else if (!player1.isAlive() && player2.isAlive()) {
-                    graphics.text("PLAYER 2 WINS", 0, 0);
+                    graphics.text("PLAYER 2 WINS", 0, (WINDOW_HEIGHT / 2) - 90);
+                    graphics.textAlign(3);
+                    graphics.textSize(24.0f);
+                    graphics.text("PRESS R TO START A NEW GAME", 0, (WINDOW_HEIGHT / 2) - 45);
                     if (gameControllers.contains(player2)) {
                         gameControllers.remove(player2);
+                    }
+                    if (keySet.contains(R)) {
+                        restarted = true;
                     }
                 }
             }
         } else {
             graphics.textAlign(3);
             graphics.textSize(24.0f);
-            graphics.text("PRESS THE SPACEBAR TO START NEW GAME", 0, (WINDOW_HEIGHT / 2) - 60);
+            graphics.text("PRESS THE SPACEBAR TO START A NEW GAME", 0, (WINDOW_HEIGHT / 2) - 45);
             if (keySet.contains(SPACEBAR)) {
                 started = true;
             }

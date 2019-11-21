@@ -47,4 +47,9 @@ public class StarshipController extends GameController {
         Starship starship = (Starship) getGameObject();
         return starship.getLives();
     }
+
+    public int getScore() {
+        Starship starship = (Starship) getGameObject();
+        return starship.getScore();
+    }
 }

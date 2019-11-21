@@ -1,11 +1,8 @@
 package edu.austral.starship.components.item;
 
 import edu.austral.starship.components._common.GameObject;
-import edu.austral.starship.components._common.interfaces.CollisionsVisitor;
 import edu.austral.starship.components._common.interfaces.Consumable;
 import edu.austral.starship.base.vector.Vector2;
-import edu.austral.starship.components.asteroid.AsteroidCollisionsVisitor;
-import edu.austral.starship.components.starship.StarshipCollisionsVisitor;
 
 import java.awt.*;
 

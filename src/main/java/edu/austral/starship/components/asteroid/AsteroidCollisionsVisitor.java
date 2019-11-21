@@ -14,6 +14,7 @@ public class AsteroidCollisionsVisitor implements CollisionsVisitor {
 
     @Override
     public void visit(Projectile projectile) {
+        projectile.getShooter().targetHit();
         projectile.damage();
     }
 

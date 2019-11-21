@@ -4,4 +4,6 @@ import edu.austral.starship.components.projectile.ProjectileController;
 
 public interface Weaponized {
     ProjectileController shoot(Shootable shootable);
+
+    void targetHit();
 }

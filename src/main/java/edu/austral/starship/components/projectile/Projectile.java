@@ -4,6 +4,7 @@ import edu.austral.starship.components._common.GameObject;
 import edu.austral.starship.components._common.interfaces.CollisionsVisitor;
 import edu.austral.starship.base.vector.Vector2;
 import edu.austral.starship.components._common.interfaces.Moveable;
+import edu.austral.starship.components._common.interfaces.Weaponized;
 
 import java.awt.*;
 
@@ -15,8 +16,9 @@ public class Projectile extends GameObject {
 
     private float speed;
     private float size;
+    private Weaponized shooter;
 
-    public Projectile(Vector2 position, Vector2 direction, float size) {
+    public Projectile(Vector2 position, Vector2 direction, float size, Weaponized shooter) {
         super(position,
                 direction,
                 new Rectangle(
@@ -32,6 +34,7 @@ public class Projectile extends GameObject {
                 (int) (PROJECTILE_HEIGHT * size)));
         speed = PROJECTILE_SPEED;
         this.size = size;
+        this.shooter = shooter;
     }
 
     @Override
@@ -42,5 +45,9 @@ public class Projectile extends GameObject {
     @Override
     public void move() {
         setPosition(getPosition().substract(getDirection().unitary().multiply(speed)));
+    }
+
+    public Weaponized getShooter() {
+        return shooter;
     }
 }

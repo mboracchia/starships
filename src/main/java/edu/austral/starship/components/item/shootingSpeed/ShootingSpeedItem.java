@@ -8,7 +8,7 @@ import edu.austral.starship.components.starship.Starship;
 import edu.austral.starship.components.starship.StarshipWeapon;
 
 public class ShootingSpeedItem extends Item {
-    private static final float UPGRADE_VALUE = 5.0f;
+    private static final float UPGRADE_VALUE = 1.0f;
 
     public ShootingSpeedItem(Vector2 position) {
         super(position, UPGRADE_VALUE);
@@ -28,7 +28,7 @@ public class ShootingSpeedItem extends Item {
 
     @Override
     public void upgrade(StarshipWeapon starshipWeapon) {
-        starshipWeapon.setShootingSpeed((int) (starshipWeapon.getShootingSize() + getValue()));
+        starshipWeapon.setShootingSpeed((int) (starshipWeapon.getShootingSpeed() - getValue()));
     }
 
     @Override

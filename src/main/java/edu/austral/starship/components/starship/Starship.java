@@ -3,6 +3,7 @@ package edu.austral.starship.components.starship;
 import edu.austral.starship.components._common.GameObject;
 import edu.austral.starship.components._common.interfaces.*;
 import edu.austral.starship.base.vector.Vector2;
+import edu.austral.starship.components.asteroid.Asteroid;
 import edu.austral.starship.components.projectile.ProjectileController;
 
 import java.awt.*;
@@ -16,6 +17,7 @@ public class Starship extends GameObject implements Controllable, Upgradable, We
     private static final CollisionsVisitor COLLISIONS_VISITOR = new StarshipCollisionsVisitor();
 
     private int lives;
+    private int score;
     private float speed;
     private StarshipWeapon starshipWeapon;
 
@@ -29,6 +31,7 @@ public class Starship extends GameObject implements Controllable, Upgradable, We
                         STARSHIP_HEIGHT),
                 COLLISIONS_VISITOR);
         lives = STARTING_LIVES;
+        score = 0;
         speed = STARTING_SPEED;
         starshipWeapon = new StarshipWeapon();
     }
@@ -85,7 +88,12 @@ public class Starship extends GameObject implements Controllable, Upgradable, We
                 getPosition().x - getDirection().multiply((float) STARSHIP_WIDTH / 2).x,
                 getPosition().y - getDirection().multiply((float) STARSHIP_HEIGHT).y);
         Vector2 direction = Vector2.vector(getDirection().x, getDirection().y);
-        return starshipWeapon.shoot(position, direction);
+        return starshipWeapon.shoot(position, direction, this);
+    }
+
+    @Override
+    public void targetHit() {
+        addScore(Asteroid.getAsteroidScore());
     }
 
     public void setLives(int lives) {
@@ -98,6 +106,14 @@ public class Starship extends GameObject implements Controllable, Upgradable, We
 
     public StarshipWeapon getStarshipWeapon() {
         return starshipWeapon;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void addScore(int score) {
+        this.score += score;
     }
 
     private Vector2 getNewPosition(boolean forward) {
